@@ -25,6 +25,11 @@ export default function Home() {
     // Initialize Socket.io client
     socket = io({ path: "/api/socketio" });
 
+    // Handle connection
+    socket.on("connect", () => {
+      console.log("Connected to Socket.io server");
+    });
+
     // Handle initial data
     socket.on("init", ({ files, content, file, cursors }) => {
       setFiles(files);
@@ -58,6 +63,7 @@ export default function Home() {
       setFiles((prev) => [...prev, fileName]);
     });
 
+    // Clean up on unmount
     return () => {
       socket.disconnect();
     };
@@ -152,7 +158,7 @@ export default function Home() {
       if (response.success) {
         setNewFileName("");
         setCreatingFile(false);
-        // Optionally, switch to the new file immediately
+        // Automatically switch to the new file
         setCurrentFile(newFileName);
         socket.emit("change-file", newFileName);
       } else {
@@ -184,6 +190,7 @@ export default function Home() {
               margin: "10px",
               borderRadius: "5px",
               border: "1px solid #ccc",
+              width: "200px",
             }}
           />
           <button
@@ -256,7 +263,7 @@ export default function Home() {
             >
               <form
                 onSubmit={handleCreateFile}
-                style={{ display: "flex", alignItems: "center" }}
+                style={{ display: "flex", alignItems: "center", width: "100%" }}
               >
                 <input
                   type="text"
@@ -270,6 +277,7 @@ export default function Home() {
                     border: "1px solid #555",
                     backgroundColor: "#3c3c3c",
                     color: "#fff",
+                    flex: 1,
                   }}
                   required
                 />
@@ -348,6 +356,23 @@ export default function Home() {
           position: absolute;
           height: 100%;
           pointer-events: none;
+        }
+
+        /* Tooltip styling */
+        .foreign-cursor:hover::after {
+          content: attr(data-tooltip);
+          position: absolute;
+          top: -25px;
+          left: 0;
+          background: rgba(0, 0, 0, 0.75);
+          color: #fff;
+          padding: 3px 8px;
+          border-radius: 4px;
+          white-space: nowrap;
+          pointer-events: none;
+          font-size: 12px;
+          transform: translateX(-50%);
+          z-index: 1000;
         }
 
         /* Optional: Hide the default tooltip to prevent conflicts */
